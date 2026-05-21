@@ -1,47 +1,3 @@
-import axios from "axios";
-import type { VercelRequest, VercelResponse } from "@vercel/node";
-
-let mlAccessToken = "";
-let mlTokenExpiry = 0;
-
-async function getMlAccessToken() {
-  if (mlAccessToken && Date.now() < mlTokenExpiry) {
-    return mlAccessToken;
-  }
-
-  const clientId = process.env.ML_CLIENT_ID;
-  const clientSecret = process.env.ML_CLIENT_SECRET;
-
-  if (!clientId || !clientSecret) {
-    return null;
-  }
-
-  try {
-    const params = new URLSearchParams();
-    params.append("grant_type", "client_credentials");
-    params.append("client_id", clientId);
-    params.append("client_secret", clientSecret);
-
-    const response = await axios.post(
-      "https://api.mercadolibre.com/oauth/token",
-      params.toString(),
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        timeout: 5000 
-      }
-    );
-
-    mlAccessToken = response.data.access_token;
-    mlTokenExpiry = Date.now() + 5 * 60 * 60 * 1000;
-    return mlAccessToken;
-  } catch (error: any) {
-    console.error("Erro Auth ML:", error?.response?.data || error?.message);
-    return null;
-  }
-}
-
 function getMockProducts(query: string) {
   const q = query.toLowerCase();
   return [
@@ -66,20 +22,24 @@ function getMockProducts(query: string) {
 
 async function searchMercadoLivre(query: string) {
   try {
-    const token = await getMlAccessToken();
-    const headers: any = {};
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
-    }
-
-    const response = await axios.get(
+    const response = await fetch(
       `https://api.mercadolibre.com/sites/MLB/search?q=${encodeURIComponent(query)}&limit=10`,
-      { headers, timeout: 5000 }
+      {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+        }
+      }
     );
 
+    if (!response.ok) {
+        console.error("ML Error:", await response.text());
+        return [];
+    }
+
+    const data = await response.json();
     const campId = process.env.ML_AFFILIATE_CAMP_ID || "SEU_CAMP_ID";
 
-    return (response.data.results || []).map((item: any) => ({
+    return (data.results || []).map((item: any) => ({
       id: item.id,
       title: item.title,
       price: item.price,
@@ -88,7 +48,7 @@ async function searchMercadoLivre(query: string) {
       affiliateUrl: `${item.permalink}?campId=${campId}`,
     }));
   } catch (error: any) {
-    console.error("Erro Busca ML:", error?.response?.data || error?.message);
+    console.error("Erro Busca ML:", error.message);
     return [];
   }
 }
@@ -102,14 +62,19 @@ async function searchShopee(query: string) {
 }
 
 export default async function handler(req: any, res: any) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+  
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+
   try {
     const q = req.query.q as string;
 
     if (!q) {
       return res.status(400).json({ error: "Termo de busca (q) é obrigatório" });
     }
-
-    console.log(`[BACKEND VERCEL] Buscando: ${q}...`);
 
     const [mlResults, amazonResults, shopeeResults] = await Promise.all([
       searchMercadoLivre(q),
@@ -129,3 +94,4 @@ export default async function handler(req: any, res: any) {
     });
   }
 }
+
