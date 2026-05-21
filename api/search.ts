@@ -14,41 +14,6 @@ export default async function handler(req: Request) {
   }
 
   try {
-    const mlResponse = await fetch(`https://api.mercadolibre.com/sites/MLB/search?q=${encodeURIComponent(q)}&limit=10`);
-    let mlResults: any[] = [];
-    if (mlResponse.ok) {
-      const mlData = await mlResponse.json();
-      const campId = "SEU_CAMP_ID";
-      mlResults = (mlData.results || []).map((item: any) => ({
-        id: item.id,
-        title: item.title,
-        price: item.price,
-        imageUrl: item.thumbnail ? item.thumbnail.replace("-I.jpg", "-O.jpg") : "",
-        store: "Mercado Livre",
-        affiliateUrl: `${item.permalink}?campId=${campId}`
-      }));
-    } else {
-      console.warn("Mercado Livre API failed with status:", mlResponse.status);
-      mlResults = [
-        {
-          id: "ML-" + q,
-          title: `${q.toUpperCase()} - Mais Vendido (Mercado Livre)`,
-          price: Math.floor(Math.random() * 90) + 40 + 0.99,
-          imageUrl: `https://loremflickr.com/400/400/${encodeURIComponent(q)}?random=4`,
-          store: "Mercado Livre",
-          affiliateUrl: `https://lista.mercadolivre.com.br/${encodeURIComponent(q)}`
-        },
-        {
-          id: "ML-2-" + q,
-          title: `${q.toUpperCase()} - Entrega Full (Mercado Livre)`,
-          price: Math.floor(Math.random() * 150) + 70 + 0.99,
-          imageUrl: `https://loremflickr.com/400/400/${encodeURIComponent(q)}?random=5`,
-          store: "Mercado Livre",
-          affiliateUrl: `https://lista.mercadolivre.com.br/${encodeURIComponent(q)}`
-        }
-      ];
-    }
-
     const amazonResults = [
       {
         id: "AMZ-" + q,
@@ -87,7 +52,7 @@ export default async function handler(req: Request) {
       }
     ];
 
-    const allResults = [...mlResults, ...amazonResults, ...shopeeResults];
+    const allResults = [...amazonResults, ...shopeeResults];
     allResults.sort((a, b) => a.price - b.price);
 
     return new Response(JSON.stringify({ products: allResults }), {
