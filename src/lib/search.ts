@@ -45,23 +45,37 @@ export function getMockProducts(query: string) {
   const q = query.toLowerCase();
   return [
     {
-      id: "AMZ-123",
-      title: `Amazon - ${query.substring(0, 10)}... Premium`,
-      price: 199.99,
-      imageUrl:
-        "https://m.media-amazon.com/images/I/61y2VVWcGBL._AC_SL1500_.jpg",
+      id: "AMZ-" + q,
+      title: `${q.toUpperCase()} - Excelente Qualidade (Amazon)`,
+      price: Math.floor(Math.random() * 100) + 50 + 0.99,
+      imageUrl: `https://loremflickr.com/400/400/${encodeURIComponent(q)}`,
       store: "Amazon",
       affiliateUrl: `https://www.amazon.com.br/dp/B0C?tag=${process.env.AMAZON_PARTNER_TAG || "SEU_ID_DE_AFILIADO_AQUI"}`,
     },
     {
-      id: "SHP-456",
-      title: `Shopee - ${query} Importação Exclusiva`,
-      price: 185.5,
-      imageUrl:
-        "https://down-br.img.susercontent.com/file/af8881e1136bba7ec6ed359d91f24d40",
+      id: "AMZ-2-" + q,
+      title: `${q.toUpperCase()} - Premium (Amazon)`,
+      price: Math.floor(Math.random() * 200) + 100 + 0.99,
+      imageUrl: `https://loremflickr.com/400/400/${encodeURIComponent(q)}?random=1`,
+      store: "Amazon",
+      affiliateUrl: `https://www.amazon.com.br/dp/B0C?tag=${process.env.AMAZON_PARTNER_TAG || "SEU_ID_DE_AFILIADO_AQUI"}`,
+    },
+    {
+      id: "SHP-" + q,
+      title: `${q.toUpperCase()} - Importação Direta (Shopee)`,
+      price: Math.floor(Math.random() * 80) + 30 + 0.50,
+      imageUrl: `https://loremflickr.com/400/400/${encodeURIComponent(q)}?random=2`,
       store: "Shopee",
       affiliateUrl: `https://shopee.com.br/universal-link?redir=https%3A%2F%2Fshopee.com.br%2Fproduct%2F123%2F456&aff_tid=${process.env.SHOPEE_AFFILIATE_ID || "SEU_ID"}`,
     },
+    {
+      id: "SHP-2-" + q,
+      title: `${q.toUpperCase()} - Custo Benefício (Shopee)`,
+      price: Math.floor(Math.random() * 50) + 20 + 0.50,
+      imageUrl: `https://loremflickr.com/400/400/${encodeURIComponent(q)}?random=3`,
+      store: "Shopee",
+      affiliateUrl: `https://shopee.com.br/universal-link?redir=https%3A%2F%2Fshopee.com.br%2Fproduct%2F124%2F456&aff_tid=${process.env.SHOPEE_AFFILIATE_ID || "SEU_ID"}`,
+    }
   ];
 }
 
