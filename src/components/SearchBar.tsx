@@ -23,7 +23,8 @@ export function SearchBar({ onSearch, isLoading }: SearchBarProps) {
     >
       <div className="relative flex items-center">
         <input
-          type="text"
+          type="search"
+          enterKeyHint="search"
           value={term}
           onChange={(e) => setTerm(e.target.value)}
           placeholder="O que você está procurando?"

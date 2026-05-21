@@ -4,28 +4,6 @@ import { ProductCard } from "./components/ProductCard";
 import { SearchBar } from "./components/SearchBar";
 import type { Product, SearchResponse } from "./types";
 
-const getFallbackML = (query: string): Product[] => {
-  const q = query.toLowerCase();
-  return [
-    {
-      id: "ML-fk1-" + Date.now(),
-      title: `${query} - Mais Vendido (Mercado Livre)`,
-      price: Math.floor(Math.random() * 90) + 40 + 0.99,
-      imageUrl: `https://picsum.photos/seed/${encodeURIComponent(q)}1/400/400`,
-      store: "Mercado Livre",
-      affiliateUrl: `https://lista.mercadolivre.com.br/${encodeURIComponent(q)}`
-    },
-    {
-      id: "ML-fk2-" + Date.now(),
-      title: `${query} - Entrega Full (Mercado Livre)`,
-      price: Math.floor(Math.random() * 150) + 70 + 0.99,
-      imageUrl: `https://picsum.photos/seed/${encodeURIComponent(q)}2/400/400`,
-      store: "Mercado Livre",
-      affiliateUrl: `https://lista.mercadolivre.com.br/${encodeURIComponent(q)}`
-    }
-  ];
-};
-
 export default function App() {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -39,7 +17,6 @@ export default function App() {
     setProducts([]);
 
     try {
-      // Bate no nosso próprio backend para Amazon
       const response = await fetch(
         `/api/search?q=${encodeURIComponent(query)}`,
       );
@@ -48,22 +25,16 @@ export default function App() {
       if (response.ok) {
         const data = await response.json();
         if (data.products) {
-          // Filtrar os mocks do ML que coloquei no backend para não duplicar com os reais
           backendProducts = data.products.filter((p: Product) => p.store !== "Mercado Livre");
         }
       }
 
-      // Buscar no ML Direto pelo Client (para não ser bloqueado por IP de Datacenter)
       let mlProducts: Product[] = [];
       try {
         const mlResponse = await fetch(`https://api.mercadolibre.com/sites/MLB/search?q=${encodeURIComponent(query)}&limit=15`);
-        
         if (mlResponse.ok) {
           const mlData = await mlResponse.json();
-          // Avoid accessing import.meta.env in strange ways that can throw ReferenceError.
-          // Vite statically replaces import.meta.env.VITE_ML_AFFILIATE_CAMP_ID
           const campId = import.meta.env.VITE_ML_AFFILIATE_CAMP_ID || "SEU_CAMP_ID";
-          
           mlProducts = (mlData.results || []).map((item: any) => ({
             id: item.id,
             title: item.title,
@@ -72,13 +43,9 @@ export default function App() {
             store: "Mercado Livre",
             affiliateUrl: `${item.permalink}?campId=${campId}`,
           }));
-        } else {
-          console.warn("Mercado Livre API failed with status:", mlResponse.status);
-          mlProducts = getFallbackML(query);
         }
-      } catch (mlError) {
-        console.warn("Mercado Livre API fetch failed:", mlError);
-        mlProducts = getFallbackML(query);
+      } catch (mlErr) {
+        console.warn("ML Direct API failed:", mlErr);
       }
 
       // Combine e ordene
