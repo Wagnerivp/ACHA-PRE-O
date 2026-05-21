@@ -17,7 +17,7 @@ export default function App() {
     setProducts([]);
 
     try {
-      // Bate no nosso próprio backend para Amazon/Shopee
+      // Bate no nosso próprio backend para Amazon
       const response = await fetch(
         `/api/search?q=${encodeURIComponent(query)}`,
       );
@@ -31,13 +31,14 @@ export default function App() {
         }
       }
 
-      // Buscar no ML Direto pelo Client ou Fallback (Mocks)
+      // Buscar no ML Direto pelo Client (para não ser bloqueado por IP de Datacenter)
       let mlProducts: Product[] = [];
       try {
         const mlResponse = await fetch(`https://api.mercadolibre.com/sites/MLB/search?q=${encodeURIComponent(query)}&limit=15`);
+        
         if (mlResponse.ok) {
           const mlData = await mlResponse.json();
-          const campId = import.meta.env.VITE_ML_AFFILIATE_CAMP_ID || "SEU_CAMP_ID";
+          const campId = import.meta.env ? import.meta.env.VITE_ML_AFFILIATE_CAMP_ID : "SEU_CAMP_ID";
           
           mlProducts = (mlData.results || []).map((item: any) => ({
             id: item.id,

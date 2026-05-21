@@ -1,11 +1,7 @@
 import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
-import {
-  searchMercadoLivre,
-  searchAmazon,
-  searchShopee,
-} from "./src/lib/search";
+import { searchAmazon } from "./src/lib/search";
 
 // Inicializa o servidor Express
 async function startServer() {
@@ -17,7 +13,7 @@ async function startServer() {
 
   // Rota Backend Oculta e Segura
   // O Frontend bate apenas no nosso próprio backend, portanto
-  // o usuário e navegadores NUNCA VEEM nossas chaves API da Amazon e Shopee.
+  // o usuário e navegadores NUNCA VEEM nossas chaves API da Amazon.
   app.get("/api/search", async (req, res) => {
     const q = req.query.q as string;
 
@@ -29,17 +25,11 @@ async function startServer() {
     try {
       console.log(`[BACKEND] Buscando: ${q}...`);
 
-      // Promise.all executa as requisições em paralelo. Mais Rapidez.
-      const [mlResults, amazonResults, shopeeResults] = await Promise.all([
-        searchMercadoLivre(q),
-        searchAmazon(q),
-        searchShopee(q),
-      ]);
-
-      const allResults = [...mlResults, ...amazonResults, ...shopeeResults];
+      // Buscar apenas Amazon do lado do servidor (protegendo chave)
+      const amazonResults = await searchAmazon(q);
 
       // Ordenação: Do Menor Preço para o Maior
-      const sortedResults = allResults.sort((a, b) => a.price - b.price);
+      const sortedResults = amazonResults.sort((a: any, b: any) => a.price - b.price);
 
       res.json({ products: sortedResults });
     } catch (error) {
