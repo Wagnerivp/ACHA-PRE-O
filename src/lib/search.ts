@@ -1,5 +1,46 @@
 import axios from 'axios';
 
+let mlAccessToken = '';
+let mlTokenExpiry = 0;
+
+async function getMlAccessToken() {
+  // Retorna cache se válido
+  if (mlAccessToken && Date.now() < mlTokenExpiry) {
+    return mlAccessToken;
+  }
+
+  const clientId = process.env.ML_CLIENT_ID;
+  const clientSecret = process.env.ML_CLIENT_SECRET;
+
+  if (!clientId || !clientSecret) {
+    return null; // Pode tentar a busca sem auth (se a API permitir)
+  }
+
+  try {
+    const response = await axios.post(
+      'https://api.mercadolibre.com/oauth/token',
+      new URLSearchParams({
+        grant_type: 'client_credentials',
+        client_id: clientId,
+        client_secret: clientSecret
+      }),
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      }
+    );
+
+    mlAccessToken = response.data.access_token;
+    // Expira em 6 horas, salvamos por 5 horas de margem
+    mlTokenExpiry = Date.now() + (5 * 60 * 60 * 1000);
+    return mlAccessToken;
+  } catch (error) {
+    console.error('Erro ao obter token do Mercado Livre:', error);
+    return null;
+  }
+}
+
 export function getMockProducts(query: string) {
   const q = query.toLowerCase();
   return [
@@ -24,7 +65,15 @@ export function getMockProducts(query: string) {
 
 export async function searchMercadoLivre(query: string) {
   try {
-    const response = await axios.get(`https://api.mercadolibre.com/sites/MLB/search?q=${encodeURIComponent(query)}&limit=10`);
+    const token = await getMlAccessToken();
+    const config: any = {};
+    if (token) {
+      config.headers = {
+        Authorization: `Bearer ${token}`
+      };
+    }
+
+    const response = await axios.get(`https://api.mercadolibre.com/sites/MLB/search?q=${encodeURIComponent(query)}&limit=10`, config);
     const campId = process.env.ML_AFFILIATE_CAMP_ID || 'SEU_CAMP_ID';
 
     return response.data.results.map((item: any) => ({
