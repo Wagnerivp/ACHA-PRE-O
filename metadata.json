@@ -1,0 +1,8 @@
+{
+  "name": "Buscador Afiliado Pro",
+  "description": "Comparador de preços multiplataforma (Amazon, Shopee, Mercado Livre) focado em rentabilização via links de afiliado.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
