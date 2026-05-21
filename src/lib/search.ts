@@ -1,4 +1,5 @@
 import axios from "axios";
+import crypto from "crypto";
 
 let mlAccessToken = "";
 let mlTokenExpiry = 0;
@@ -137,8 +138,43 @@ export async function searchAmazon(query: string) {
 }
 
 export async function searchShopee(query: string) {
-  if (!process.env.SHOPEE_APP_ID) {
-    return getMockProducts(query).filter((p: any) => p.store === "Shopee");
+  const shopeeAppId = process.env.SHOPEE_APP_ID;
+  const shopeeSecret = process.env.SHOPEE_APP_SECRET;
+
+  if (shopeeAppId && shopeeSecret) {
+    try {
+      const path = "/api/v2/affiliate/product/search";
+      const timestamp = Math.floor(Date.now() / 1000).toString();
+      const baseString = shopeeAppId + path + timestamp;
+      const sign = crypto.createHmac("sha256", shopeeSecret).update(baseString).digest("hex");
+
+      const shopeeUrl = new URL(`https://partner.shopeemobile.com${path}`);
+      shopeeUrl.searchParams.append("partner_id", shopeeAppId);
+      shopeeUrl.searchParams.append("timestamp", timestamp);
+      shopeeUrl.searchParams.append("sign", sign);
+
+      const response = await axios.post(shopeeUrl.toString(), {
+        keyword: query,
+        limit: 10,
+        sort_type: 1
+      });
+
+      const items = response.data?.data?.item_list || [];
+      if (items.length > 0) {
+        return items.map((item: any) => ({
+          id: `SHP-${item.item_id}`,
+          title: item.item_name,
+          price: item.price / 100000,
+          imageUrl: item.image_url,
+          store: "Shopee",
+          affiliateUrl: item.product_link || `https://shopee.com.br/product/${item.shop_id}/${item.item_id}?aff_tid=${process.env.SHOPEE_AFFILIATE_ID || ''}`
+        }));
+      }
+    } catch (err) {
+      console.error("Shopee API request failed:", err);
+    }
   }
+
+  // Fallback se não retornou nada ou não tem chaves
   return getMockProducts(query).filter((p: any) => p.store === "Shopee");
 }

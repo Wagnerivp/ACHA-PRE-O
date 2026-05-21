@@ -37,7 +37,7 @@ export default function App() {
         const mlResponse = await fetch(`https://api.mercadolibre.com/sites/MLB/search?q=${encodeURIComponent(query)}&limit=15`);
         if (mlResponse.ok) {
           const mlData = await mlResponse.json();
-          const campId = "SEU_CAMP_ID";
+          const campId = import.meta.env.VITE_ML_AFFILIATE_CAMP_ID || "SEU_CAMP_ID";
           
           mlProducts = (mlData.results || []).map((item: any) => ({
             id: item.id,
