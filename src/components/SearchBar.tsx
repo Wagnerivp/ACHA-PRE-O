@@ -1,5 +1,5 @@
-import { Search } from 'lucide-react';
-import React, { useState } from 'react';
+import { Search } from "lucide-react";
+import React, { useState } from "react";
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
@@ -7,7 +7,7 @@ interface SearchBarProps {
 }
 
 export function SearchBar({ onSearch, isLoading }: SearchBarProps) {
-  const [term, setTerm] = useState('');
+  const [term, setTerm] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,7 +17,10 @@ export function SearchBar({ onSearch, isLoading }: SearchBarProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="w-full max-w-3xl mx-auto drop-shadow-md">
+    <form
+      onSubmit={handleSubmit}
+      className="w-full max-w-3xl mx-auto drop-shadow-md"
+    >
       <div className="relative flex items-center">
         <input
           type="text"

@@ -1,5 +1,5 @@
-import { ShoppingBag } from 'lucide-react';
-import type { Product } from '../types';
+import { ShoppingBag } from "lucide-react";
+import type { Product } from "../types";
 
 interface ProductCardProps {
   product: Product;
@@ -9,25 +9,25 @@ export function ProductCard({ product }: ProductCardProps) {
   // Cores de badge para as lojas
   const getStoreStyles = (store: string) => {
     switch (store) {
-      case 'Amazon':
-        return 'bg-amber-100 text-amber-800 border-amber-200';
-      case 'Shopee':
-        return 'bg-orange-100 text-orange-800 border-orange-200';
-      case 'Mercado Livre':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case "Amazon":
+        return "bg-amber-100 text-amber-800 border-amber-200";
+      case "Shopee":
+        return "bg-orange-100 text-orange-800 border-orange-200";
+      case "Mercado Livre":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return "bg-gray-100 text-gray-800 border-gray-200";
     }
   };
 
   const handleBuyClick = () => {
     // Redireciona para o Link de Afiliado, abrindo em nova aba
-    window.open(product.affiliateUrl, '_blank', 'noopener,noreferrer');
+    window.open(product.affiliateUrl, "_blank", "noopener,noreferrer");
   };
 
-  const formattedPrice = new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
+  const formattedPrice = new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
   }).format(product.price);
 
   return (
@@ -43,9 +43,11 @@ export function ProductCard({ product }: ProductCardProps) {
         ) : (
           <ShoppingBag className="text-gray-300" size={48} />
         )}
-        
+
         {/* Badge da Loja Localizado sobre a imagem */}
-        <div className={`absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-semibold border shadow-sm backdrop-blur-md bg-opacity-90 ${getStoreStyles(product.store)}`}>
+        <div
+          className={`absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-semibold border shadow-sm backdrop-blur-md bg-opacity-90 ${getStoreStyles(product.store)}`}
+        >
           {product.store}
         </div>
       </div>
@@ -55,12 +57,12 @@ export function ProductCard({ product }: ProductCardProps) {
         <h3 className="text-sm font-medium text-gray-800 line-clamp-2 leading-snug mb-3">
           {product.title}
         </h3>
-        
+
         <div className="mt-auto">
           <div className="text-xl font-bold text-gray-900 mb-4">
             {formattedPrice}
           </div>
-          
+
           <button
             onClick={handleBuyClick}
             className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-colors flex items-center justify-center gap-2"

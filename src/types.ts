@@ -3,7 +3,7 @@ export interface Product {
   title: string;
   price: number;
   imageUrl: string;
-  store: 'Amazon' | 'Shopee' | 'Mercado Livre';
+  store: "Amazon" | "Shopee" | "Mercado Livre";
   affiliateUrl: string;
 }
 

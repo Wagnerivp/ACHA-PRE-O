@@ -1,8 +1,8 @@
-import { SearchIcon, ShoppingBag } from 'lucide-react';
-import { useState } from 'react';
-import { ProductCard } from './components/ProductCard';
-import { SearchBar } from './components/SearchBar';
-import type { Product, SearchResponse } from './types';
+import { SearchIcon, ShoppingBag } from "lucide-react";
+import { useState } from "react";
+import { ProductCard } from "./components/ProductCard";
+import { SearchBar } from "./components/SearchBar";
+import type { Product, SearchResponse } from "./types";
 
 export default function App() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -18,21 +18,26 @@ export default function App() {
 
     try {
       // Bate no nosso próprio backend, onde as chaves estão seguras.
-      const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
-      
+      const response = await fetch(
+        `/api/search?q=${encodeURIComponent(query)}`,
+      );
+
       if (!response.ok) {
-        throw new Error('Falha na resposta do servidor');
+        throw new Error("Falha na resposta do servidor");
       }
 
       const data: SearchResponse = await response.json();
-      
+
       if (data.error) {
         setError(data.error);
       } else if (data.products) {
         setProducts(data.products);
       }
     } catch (err: any) {
-      setError(err.message || 'Houve um erro buscando os produtos. Tente novamente mais tarde.');
+      setError(
+        err.message ||
+          "Houve um erro buscando os produtos. Tente novamente mais tarde.",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -71,7 +76,8 @@ export default function App() {
               Comece a economizar
             </h2>
             <p className="text-gray-500 max-w-md mx-auto text-lg leading-relaxed">
-              Pesquise qualquer produto e encontre instantaneamente o menor preço nas principais plataformas.
+              Pesquise qualquer produto e encontre instantaneamente o menor
+              preço nas principais plataformas.
             </p>
           </div>
         )}
@@ -86,7 +92,9 @@ export default function App() {
         {/* Results Grid - Ordenado no backend por preço */}
         {hasSearched && !isLoading && !error && products.length === 0 && (
           <div className="text-center mt-20">
-            <p className="text-xl text-gray-500 font-medium">Nenhum produto encontrado.</p>
+            <p className="text-xl text-gray-500 font-medium">
+              Nenhum produto encontrado.
+            </p>
           </div>
         )}
 
@@ -101,7 +109,9 @@ export default function App() {
       <footer className="bg-white border-t border-gray-200 py-8">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <p className="text-gray-500 text-sm">
-            © {new Date().getFullYear()} AchaPreço. Transparência nos links: Esta plataforma recebe pequenas comissões em compras originadas em pesquisa (sem alterar seu preço final).
+            © {new Date().getFullYear()} AchaPreço. Transparência nos links:
+            Esta plataforma recebe pequenas comissões em compras originadas em
+            pesquisa (sem alterar seu preço final).
           </p>
         </div>
       </footer>
