@@ -1,5 +1,3 @@
-import axios from "axios";
-
 let mlAccessToken = "";
 let mlTokenExpiry = 0;
 
@@ -16,21 +14,28 @@ async function getMlAccessToken() {
   }
 
   try {
-    const response = await axios.post(
+    const response = await fetch(
       "https://api.mercadolibre.com/oauth/token",
-      new URLSearchParams({
-        grant_type: "client_credentials",
-        client_id: clientId,
-        client_secret: clientSecret,
-      }),
       {
+        method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
-      },
+        body: new URLSearchParams({
+          grant_type: "client_credentials",
+          client_id: clientId,
+          client_secret: clientSecret,
+        })
+      }
     );
 
-    mlAccessToken = response.data.access_token;
+    if (!response.ok) {
+      console.error('Erro Auth ML:', await response.text());
+      return null;
+    }
+
+    const data = await response.json();
+    mlAccessToken = data.access_token;
     mlTokenExpiry = Date.now() + 5 * 60 * 60 * 1000;
     return mlAccessToken;
   } catch (error) {
@@ -66,20 +71,27 @@ function getMockProducts(query: string) {
 async function searchMercadoLivre(query: string) {
   try {
     const token = await getMlAccessToken();
-    const config: any = {};
+    const init: RequestInit = {};
     if (token) {
-      config.headers = {
+      init.headers = {
         Authorization: `Bearer ${token}`,
       };
     }
 
-    const response = await axios.get(
+    const response = await fetch(
       `https://api.mercadolibre.com/sites/MLB/search?q=${encodeURIComponent(query)}&limit=10`,
-      config,
+      init,
     );
+
+    if (!response.ok) {
+      console.error('Erro Busca ML:', await response.text());
+      return [];
+    }
+
+    const data = await response.json();
     const campId = process.env.ML_AFFILIATE_CAMP_ID || "SEU_CAMP_ID";
 
-    return response.data.results.map((item: any) => ({
+    return data.results.map((item: any) => ({
       id: item.id,
       title: item.title,
       price: item.price,

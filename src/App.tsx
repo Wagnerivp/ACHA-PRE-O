@@ -23,7 +23,12 @@ export default function App() {
       );
 
       if (!response.ok) {
-        throw new Error("Falha na resposta do servidor");
+        let errMsg = "Falha na resposta do servidor";
+        try {
+          const errData = await response.json();
+          if (errData.error) errMsg = errData.error;
+        } catch(e) {}
+        throw new Error(errMsg);
       }
 
       const data: SearchResponse = await response.json();
