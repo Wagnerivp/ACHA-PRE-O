@@ -20,11 +20,6 @@ export function ProductCard({ product }: ProductCardProps) {
     }
   };
 
-  const handleBuyClick = () => {
-    // Redireciona para o Link de Afiliado, abrindo em nova aba
-    window.open(product.affiliateUrl, "_blank", "noopener,noreferrer");
-  };
-
   const formattedPrice = new Intl.NumberFormat("pt-BR", {
     style: "currency",
     currency: "BRL",
@@ -64,12 +59,14 @@ export function ProductCard({ product }: ProductCardProps) {
             {formattedPrice}
           </div>
 
-          <button
-            onClick={handleBuyClick}
-            className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-colors flex items-center justify-center gap-2"
+          <a
+            href={product.affiliateUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-colors flex items-center justify-center gap-2 text-center"
           >
             Ir para a Loja
-          </button>
+          </a>
         </div>
       </div>
     </div>
