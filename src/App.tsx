@@ -38,40 +38,23 @@ export default function App() {
         
         if (mlResponse.ok) {
           const mlData = await mlResponse.json();
-          const campId = import.meta.env ? import.meta.env.VITE_ML_AFFILIATE_CAMP_ID : "SEU_CAMP_ID";
+          // Avoid accessing import.meta.env in strange ways that can throw ReferenceError.
+          // Vite statically replaces import.meta.env.VITE_ML_AFFILIATE_CAMP_ID
+          const campId = import.meta.env.VITE_ML_AFFILIATE_CAMP_ID || "SEU_CAMP_ID";
           
           mlProducts = (mlData.results || []).map((item: any) => ({
             id: item.id,
             title: item.title,
             price: item.price,
-            imageUrl: item.thumbnail ? item.thumbnail.replace("-I.jpg", "-O.jpg") : "",
+            imageUrl: item.thumbnail ? item.thumbnail.replace("http://", "https://").replace("-I.jpg", "-O.jpg") : "",
             store: "Mercado Livre",
             affiliateUrl: `${item.permalink}?campId=${campId}`,
           }));
         } else {
-          throw new Error("API do Livre bloqueada.");
+          console.warn("Mercado Livre API failed with status:", mlResponse.status);
         }
       } catch (mlError) {
-        console.warn("Mercado Livre API failed, using fallback mocks:", mlError);
-        const q = query.toLowerCase();
-        mlProducts = [
-          {
-            id: "ML-m1-" + q,
-            title: `${q.toUpperCase()} - Mais Vendido (Mercado Livre)`,
-            price: Math.floor(Math.random() * 90) + 40 + 0.99,
-            imageUrl: `https://loremflickr.com/400/400/${encodeURIComponent(q)}?random=4`,
-            store: "Mercado Livre",
-            affiliateUrl: `https://lista.mercadolivre.com.br/${encodeURIComponent(q)}`
-          },
-          {
-            id: "ML-m2-" + q,
-            title: `${q.toUpperCase()} - Entrega Full (Mercado Livre)`,
-            price: Math.floor(Math.random() * 150) + 70 + 0.99,
-            imageUrl: `https://loremflickr.com/400/400/${encodeURIComponent(q)}?random=5`,
-            store: "Mercado Livre",
-            affiliateUrl: `https://lista.mercadolivre.com.br/${encodeURIComponent(q)}`
-          }
-        ];
+        console.warn("Mercado Livre API fetch failed:", mlError);
       }
 
       // Combine e ordene
