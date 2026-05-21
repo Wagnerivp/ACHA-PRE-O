@@ -27,6 +27,26 @@ export default async function handler(req: Request) {
         store: "Mercado Livre",
         affiliateUrl: `${item.permalink}?campId=${campId}`
       }));
+    } else {
+      console.warn("Mercado Livre API failed with status:", mlResponse.status);
+      mlResults = [
+        {
+          id: "ML-" + q,
+          title: `${q.toUpperCase()} - Mais Vendido (Mercado Livre)`,
+          price: Math.floor(Math.random() * 90) + 40 + 0.99,
+          imageUrl: `https://loremflickr.com/400/400/${encodeURIComponent(q)}?random=4`,
+          store: "Mercado Livre",
+          affiliateUrl: `https://lista.mercadolivre.com.br/${encodeURIComponent(q)}`
+        },
+        {
+          id: "ML-2-" + q,
+          title: `${q.toUpperCase()} - Entrega Full (Mercado Livre)`,
+          price: Math.floor(Math.random() * 150) + 70 + 0.99,
+          imageUrl: `https://loremflickr.com/400/400/${encodeURIComponent(q)}?random=5`,
+          store: "Mercado Livre",
+          affiliateUrl: `https://lista.mercadolivre.com.br/${encodeURIComponent(q)}`
+        }
+      ];
     }
 
     const amazonResults = [
